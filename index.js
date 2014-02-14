@@ -1,70 +1,52 @@
 var util = require('util');
-var growly = require('growly');
 var path = require('path');
 
-var MSG_SUCCESS = '%d tests passed in %s.';
-var MSG_FAILURE = '%d/%d tests failed in %s.';
-var MSG_ERROR = '';
+var sys = require('sys')
+var exec = require('child_process').exec;
 
-var OPTIONS = {
-  success: {
-    dispname: 'Success',
-    title: 'PASSED - %s',
-    icon: path.join(__dirname, 'images/success.png')
-  },
-  failed: {
-    dispname: 'Failure',
-    title: 'FAILED - %s',
-    icon: path.join(__dirname, 'images/failed.png')
-  },
-  error: {
-    dispname: 'Aborted',
-    title: 'ERROR - %s',
-    icon: path.join(__dirname, 'images/error.png')
-  }
-};
+var terminalNotifier = function(msgParams) {
+  var params = msgParams.join(" ");
+  var cmd = "terminal-notifier " + params;
+  return cmd;
+}
 
-
-var GrowlReporter = function(helper, logger, config) {
-  var log = logger.create('reporter.growl');
-
-  var optionsFor = function(type, browser) {
-    var prefix = config && config.prefix ? config.prefix : '';
-    return helper.merge(OPTIONS[type], {title: prefix + util.format(OPTIONS[type].title, browser)});
-  };
-
-  growly.register('Karma', '', [], function(error) {
-    var warning = 'No running version of GNTP found.\n' +
-	                'Make sure the Growl service is installed and running.\n' +
-                  'For more information see https://github.com/theabraham/growly.';
-    if (error) {
-      log.warn(warning);
-    }
-  });
+var NotificationReporter = function(helper, logger, config) {
+  var log = logger.create('reporter.notificationCenter');
 
   this.adapters = [];
 
   this.onBrowserComplete = function(browser) {
     var results = browser.lastResult;
     var time = helper.formatTimeInterval(results.totalTime);
+    var msg = "";
+    var title = "";
+    var msgParams = [];
 
     if (results.disconnected || results.error) {
-      return growly.notify(MSG_ERROR, optionsFor('error', browser.name));
+      // return growly.notify(MSG_ERROR, optionsFor('error', browser.name));
+      msg = "'Karma Testing Aborted due to error'";
+      title = "'Karma ABORTED - " + browser.name + "'";
+
+    } else if (results.failed) {
+      // return growly.notify(util.format(MSG_FAILURE, results.failed, results.total, time),
+      //     optionsFor('failed', browser.name));
+      msg = util.format("'%d/%d tests failed in %s.'", results.failed, results.total, time);
+      title = "'Karma FAILURE - " + browser.name + "'";
+    } else {
+      msg = util.format("'%d tests passed in %s.'", results.success, time);
+      title = "'Karma SUCCESS - " + browser.name + "'";
     }
 
-    if (results.failed) {
-      return growly.notify(util.format(MSG_FAILURE, results.failed, results.total, time),
-          optionsFor('failed', browser.name));
-    }
-
-    growly.notify(util.format(MSG_SUCCESS, results.success, time), optionsFor('success',
-        browser.name));
+    msgParams.push("-message");
+    msgParams.push(msg);
+    msgParams.push("-title");
+    msgParams.push(title);
+    exec(terminalNotifier(msgParams), function(error, stdout, stderr) { });
   };
 };
 
-GrowlReporter.$inject = ['helper', 'logger','config.growlReporter'];
+NotificationReporter.$inject = ['helper', 'logger','config.notificationCenterReporter'];
 
-// PUBLISH DI MODULE
 module.exports = {
-  'reporter:growl': ['type', GrowlReporter]
+  'reporter:notificationCenter': ['type', NotificationReporter]
 };
