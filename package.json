@@ -1,30 +1,23 @@
 {
-  "name": "karma-notificationCenter-reporter",
-  "version": "0.1.1",
-  "description": "A Karma plugin. Report results to the OSX Notification Center.",
+  "name": "karma-notification_center-reporter",
+  "version": "0.0.1",
+  "description": "A Karma plugin for reporting test results via OSX Notification Center",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/karma-runner/karma-growl-reporter.git"
+    "url": "https://github.com/cmenscher/karma-notificationCenter-reporter"
   },
   "keywords": [
-    "karma-plugin",
-    "karma-reporter",
-    "growl"
+    "karma",
+    "osx",
+    "Notification Center"
   ],
-  "author": "Corey Menscher <clmensch@gmail.com>",
-  "dependencies": {
-    "terminal-notifier": "~0.1.2"
-  },
-  "peerDependencies": {
-    "karma": ">=0.9"
-  },
+  "author": "Corey Menscher <clmensch@gmail.com> (http://portfolio.menscher.com/)",
   "license": "MIT",
-  "devDependencies": {
-  },
-  "contributors": [
-  ]
+  "bugs": {
+    "url": "https://github.com/cmenscher/karma-notificationCenter-reporter/issues"
+  }
 }
